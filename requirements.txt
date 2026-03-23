@@ -1,7 +1,11 @@
-# ─── Streamlit ───
+# ============================================
+# requirements.txt - Adawat Project
+# ============================================
+
+# ─── Framework ───
 streamlit>=1.30.0
 
-# ─── Adawat core dependencies (Taha Zerrouki ecosystem) ───
+# ─── Arabic NLP Core (Taha Zerrouki ecosystem) ───
 pyarabic>=0.6.8
 mishkal>=0.3
 qalsadi>=0.3.6
@@ -11,14 +15,6 @@ asmai>=0.1
 sylajone>=0.2
 maskouk-pysqlite>=0.1
 arramooz-pysqlite
-repr>=0.3.1
 
-# ─── NLP / ML ───
-stanza
+# ─── Data Validation ───
 pydantic>=2.0
-
-# ─── Optional (if using Farasa/Sentiment) ───
-farasapy
-camel-tools
-torch
-transformers
