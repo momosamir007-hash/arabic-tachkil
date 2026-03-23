@@ -1,0 +1,20 @@
+# ============================================
+# requirements-ml.txt - Optional ML dependencies
+# ============================================
+# تثبيت: pip install -r requirements-ml.txt
+# ⚠️ حجمها كبير (~3 GB)
+
+# ─── اختر واحد فقط حسب الحاجة ───
+
+# الخيار 1: Transformers (تحليل مشاعر + لهجات)
+# torch
+# transformers
+
+# الخيار 2: CAMeL Tools (يحتاج Python <= 3.10)
+# camel-tools
+
+# الخيار 3: Stanza (تحليل صرفي)
+# stanza
+
+# الخيار 4: Farasa
+# farasapy
