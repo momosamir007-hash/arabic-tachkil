@@ -1,4 +1,22 @@
+# ─── Streamlit ───
 streamlit>=1.30.0
-pyarabic
+
+# ─── Adawat core dependencies (Taha Zerrouki ecosystem) ───
+pyarabic>=0.6.8
+mishkal>=0.3
+qalsadi>=0.3.6
+naftawayh>=0.4
+tashaphyne>=0.3.4.1
+asmai>=0.1
+sylajone>=0.2
+maskouk-pysqlite>=0.1
+arramooz-pysqlite
+repr>=0.3.1
+
+# ─── NLP / ML ───
 stanza
 pydantic>=2.0
+
+# ─── Optional (if using Farasa/Sentiment) ───
+# farasapy
+# camel-tools
