@@ -1,0 +1,93 @@
+Starting test_log.py...
+Asmai Error: No module named 'asmai.sentiment'
+Stanza imported successfully.
+Stanza version: 1.11.1
+Finished test_log.py.
+Starting test_log.py...
+Asmai Error: No module named 'asmai.sentiment'
+Stanza imported successfully.
+Stanza version: 1.11.1
+Finished test_log.py.
+Testing Stanza Sentiment Analysis...
+Stanza Error: download() got an unexpected keyword argument 'quiet'
+Finished Stanza Test.
+Retrying Stanza Sentiment Analysis without 'quiet' in download...
+Stanza Error: Cannot find the following processor and model name combination: sentiment, default. Please check if you have provided the correct model name.
+Finished Stanza Test 2.
+Checking available processors for Arabic 'ar'...
+Available processors for 'ar': ['backward_charlm', 'depparse', 'forward_charlm', 'lemma', 'mwt', 'ner', 'pos', 'pretrain', 'tokenize', 'default_processors', 'packages', 'default_md5', 'lang_name']
+Sentiment NOT found for 'ar' in resources.
+Final API Stanza Test...
+Status: 200
+Response: {
+  "action_executed": "Stanza",
+  "result": {
+    "results": [
+      {
+        "text": "زار",
+        "lemma": null,
+        "pos": null,
+        "head": null,
+        "deprel": null
+      },
+      {
+        "text": "الملك",
+        "lemma": null,
+        "pos": null,
+        "head": null,
+        "deprel": null
+      },
+      {
+        "text": "القاهرة",
+        "lemma": null,
+        "pos": null,
+        "head": null,
+        "deprel": null
+      },
+      {
+        "text": ".",
+        "lemma": null,
+        "pos": null,
+        "head": null,
+        "deprel": null
+      }
+    ]
+  }
+}
+Final API Stanza Test...
+Status: 200
+Response: {
+  "action_executed": "Stanza",
+  "result": {
+    "results": [
+      {
+        "text": "زار",
+        "lemma": "زَار",
+        "pos": "VERB",
+        "head": 0,
+        "deprel": "root"
+      },
+      {
+        "text": "الملك",
+        "lemma": "مَلِك",
+        "pos": "NOUN",
+        "head": 1,
+        "deprel": "nsubj"
+      },
+      {
+        "text": "القاهرة",
+        "lemma": "قَاهِرَة",
+        "pos": "NOUN",
+        "head": 2,
+        "deprel": "nmod"
+      },
+      {
+        "text": ".",
+        "lemma": ".",
+        "pos": "PUNCT",
+        "head": 1,
+        "deprel": "punct"
+      }
+    ]
+  }
+}

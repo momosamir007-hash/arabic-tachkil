@@ -1,0 +1,26 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "adawat"
+version = "0.2.0"
+description = "Adawat: Arabic Language Toolkit (Modernized API Edition)"
+readme = "README.md"
+authors = [{ name = "Taha Zerrouki", email = "taha.zerrouki@gmail.com" }]
+license = { text = "GPL-3.0" }
+requires-python = ">=3.10"
+
+dependencies = [
+    "asmai>=0.1", "mishkal>=0.3", "naftawayh>=0.4", "pyarabic>=0.6.8",
+    "qalsadi>=0.3.6", "sylajone>=0.2", "tashaphyne>=0.3.4.1",
+    "fastapi>=0.100.0", "uvicorn>=0.22.0", "pydantic>=2.0.0",
+    "camel-tools>=1.2.0", "farasapy>=0.0.14", "stanza>=1.5.0"
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=7.0", "black>=23.0", "isort>=5.0"]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["adawat*", "api*"]

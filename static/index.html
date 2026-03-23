@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>أدوات: حزمة المعالجة اللغوية العربية</title>
+    <link rel="stylesheet" href="style.css?v=1.1">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>أدوات (Adawat)</h1>
+            <p>المساعد الذكي لمعالجة اللغة العربية</p>
+        </header>
+
+        <main class="main-grid">
+            <section class="card input-section">
+                <textarea id="inputText" placeholder="أدخل النص العربي هنا..."></textarea>
+                
+                <div class="result-section">
+                    <h2>النتيجة:</h2>
+                    <div id="resultBox" class="result-box">النتائج ستظهر هنا...</div>
+                </div>
+            </section>
+
+            <section class="card actions-section">
+                <div class="action-group">
+                    <h3>💎 التشكيل</h3>
+                    <div class="action-buttons">
+                        <button class="btn-action" data-action="tashkeel" title="إضافة الحركات للنص العربي">تشكيل</button>
+                        <button class="btn-action" data-action="strip" title="حذف جميع الحركات من النص">إزالة الحركات</button>
+                    </div>
+                </div>
+
+                <div class="action-group">
+                    <h3>🔍 التحليل</h3>
+                    <div class="action-buttons">
+                        <button class="btn-action" data-action="stem" title="استخراج جذور الكلمات وتحليلها">جذوع الكلمات</button>
+                        <button class="btn-action" data-action="wordtag" title="تصنيف الكلمات إلى اسم وفعل وأداة">تصنيف الكلمات</button>
+                        <button class="btn-action" data-action="tokenize" title="تقسيم النص إلى كلمات مفردة">تقطيع النص</button>
+                        <button class="btn-action" data-action="language" title="تحديد اللغة المستخدمة في كل جزء">كشف اللغة</button>
+                    </div>
+                </div>
+
+                <div class="action-group">
+                    <h3>🛠️ أدوات النص</h3>
+                    <div class="action-buttons">
+                        <button class="btn-action" data-action="num2word" title="تحويل الأرقام إلى كلمات مكتوبة">التفقيط</button>
+                        <button class="btn-action" data-action="named" title="استخراج الأسماء والأماكن والمؤسسات">استخراج الأعلام</button>
+                        <button class="btn-action" data-action="chunk" title="تقسيم النص إلى جمل مفيدة">تقطيع الجمل</button>
+                        <button class="btn-action" data-action="inverse" title="قلب ترتيب الحروف في النص">عكس النص</button>
+                    </div>
+                </div>
+
+                <div class="action-group">
+                    <h3>📋 التنسيق (LaTeX)</h3>
+                    <div class="action-buttons">
+                        <button class="btn-action" data-action="itemize" title="تنسيق النص كقائمة نقطية لملفات LaTeX">LaTeX Itemize</button>
+                        <button class="btn-action" data-action="tabulize" title="تنسيق النص كجدول لملفات LaTeX">LaTeX Table</button>
+                    </div>
+                </div>
+
+                <div class="action-group">
+                    <h3>🚀 ذكاء متطور (Advanced AI)</h3>
+                    <div class="action-buttons">
+                        <button class="btn-action" data-action="sentiment" title="تحليل مشاعر النص (إيجابي/سلبي)">تحليل المشاعر</button>
+                        <button class="btn-action" data-action="dialect" title="تحديد اللهجة العربية للنص">تحديد اللهجة</button>
+                        <button class="btn-action" data-action="stanza" title="تحليل لغوي عميق (Stanza)">تحليل بنيوي</button>
+                        <button class="btn-action" data-action="farasa_ner" title="استخراج أعلام متطور (Farasa)">أعلام (Farasa)</button>
+                    </div>
+                </div>
+
+                <button id="processBtn" class="btn-process">
+                    <span>تحليل ومعالجة</span>
+                    <div class="loader" id="loader"></div>
+                </button>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        let selectedAction = 'tashkeel';
+
+        // Handle action button selection
+        document.querySelectorAll('.btn-action').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.btn-action').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                selectedAction = btn.dataset.action;
+            });
+        });
+
+        // Set default active
+        document.querySelector('[data-action="tashkeel"]').classList.add('active');
+
+        // Handle processing
+        const processBtn = document.getElementById('processBtn');
+        const inputText = document.getElementById('inputText');
+        const resultBox = document.getElementById('resultBox');
+        const loader = document.getElementById('loader');
+
+        processBtn.addEventListener('click', async () => {
+            const text = inputText.value.trim();
+            if (!text && selectedAction !== 'random') {
+                resultBox.innerText = 'يرجى إدخال نص أولاً';
+                return;
+            }
+
+            // Show loading
+            loader.style.display = 'block';
+            processBtn.disabled = true;
+            resultBox.style.opacity = '0.5';
+
+            try {
+                const response = await fetch('/api/v1/process', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        action: selectedAction,
+                        text: text,
+                        options: {}
+                    })
+                });
+
+                const data = await response.json();
+                
+                if (response.ok) {
+                    let res = data.result;
+                    // Fix "square dot" issue by replacing ellipsis character with standard dots
+                    if (typeof res === 'string') {
+                        res = res.replace(/…/g, '...');
+                    }
+                    
+                    resultBox.innerHTML = ''; // Clear previous
+
+                    if (Array.isArray(res) && res.length > 0) {
+                        const grid = document.createElement('div');
+                        grid.className = 'result-grid';
+                        
+                        res.forEach(item => {
+                            const card = document.createElement('div');
+                            card.className = 'word-card';
+                            
+                            if (typeof item === 'object' && !Array.isArray(item)) {
+                                if (item.vocalized || item.root || item.stem) {
+                                    // Morphological Card
+                                    const gender = item.tag_gender === 1 ? 'ذكر' : (item.tag_gender === 3 ? 'أنثى' : '');
+                                    const number = item.tag_original_number || '';
+                                    card.innerHTML = `
+                                        <div class="word-header">
+                                            <div class="word-vocalized">${item.vocalized || item.word}</div>
+                                            <div class="badge badge-type">${item.type ? item.type.split(':')[0] : 'كلمة'}</div>
+                                        </div>
+                                        <div class="word-details">
+                                            <div class="detail-item"><span>الجذر:</span><span>${item.root || '-'}</span></div>
+                                            <div class="detail-item"><span>الأصل:</span><span>${item.stem || '-'}</span></div>
+                                            <div class="detail-item"><span>الجنس:</span><span>${gender || '-'}</span></div>
+                                            <div class="detail-item"><span>العدد:</span><span>${number || '-'}</span></div>
+                                        </div>
+                                    `;
+                                } else if (item.sentiment !== undefined) {
+                                    // Sentiment Card
+                                    const emoji = item.sentiment === 'positive' ? '😊' : (item.sentiment === 'negative' ? '😫' : '😐');
+                                    card.innerHTML = `
+                                        <div class="word-header">
+                                            <div class="word-vocalized">${emoji} ${item.sentiment}</div>
+                                            <div class="badge">مشاعر</div>
+                                        </div>
+                                    `;
+                                } else if (item.dialect !== undefined) {
+                                    // Dialect Card
+                                    card.innerHTML = `
+                                        <div class="word-header">
+                                            <div class="word-vocalized">${item.dialect}</div>
+                                            <div class="badge badge-gender">لهجة</div>
+                                        </div>
+                                        <div class="word-details">
+                                            <div class="detail-item"><span>الثقة:</span><span>${item.confidence}</span></div>
+                                        </div>
+                                    `;
+                                } else if (item.pos !== undefined) {
+                                    // Stanza Word Card
+                                    card.innerHTML = `
+                                        <div class="word-header">
+                                            <div class="word-vocalized">${item.text}</div>
+                                            <div class="badge badge-number">${item.pos}</div>
+                                        </div>
+                                        <div class="word-details">
+                                            <div class="detail-item"><span>الأصل:</span><span>${item.lemma}</span></div>
+                                            <div class="detail-item"><span>العلاقة:</span><span>${item.deprel}</span></div>
+                                        </div>
+                                    `;
+                                } else if (item.tag !== undefined) {
+                                    // Tagging Card
+                                    const tagLabel = item.tag === 'n' ? 'اسم' : (item.tag === 'v' ? 'فعل' : (item.tag === 't' ? 'أداة' : 'آخرى'));
+                                    card.innerHTML = `
+                                        <div class="word-header">
+                                            <div class="word-vocalized">${item.word}</div>
+                                            <div class="badge badge-type">${tagLabel}</div>
+                                        </div>
+                                        <div class="word-details">
+                                            <div class="detail-item"><span>الوسم:</span><span>${item.tag}</span></div>
+                                        </div>
+                                    `;
+                                } else {
+                                    card.innerText = JSON.stringify(item);
+                                }
+                            } else if (Array.isArray(item) && item.length === 2) {
+                                // Language Detection Tuple
+                                card.innerHTML = `
+                                    <div class="word-header">
+                                        <div class="word-vocalized" style="font-size: 1.1rem">${item[1]}</div>
+                                        <div class="badge">${item[0] === 'arabic' ? 'عربي' : 'لاتيني'}</div>
+                                    </div>
+                                `;
+                            } else {
+                                card.innerText = item;
+                            }
+                            grid.appendChild(card);
+                        });
+                        resultBox.appendChild(grid);
+                    } else if (typeof res === 'object' && res !== null) {
+                        if (res.error) {
+                            resultBox.innerHTML = `<div class="error-msg" style="color: #f87171; padding: 10px; border: 1px solid #ef4444; border-radius: 5px;">⚠️ ${res.error}</div>`;
+                        } else {
+                            resultBox.innerText = JSON.stringify(res, null, 2);
+                        }
+                    } else {
+                        resultBox.innerText = res || 'لا توجد نتائج';
+                    }
+                } else {
+                    resultBox.innerText = 'خطأ: ' + (data.detail || 'حدث خطأ غير معروف');
+                }
+            } catch (error) {
+                resultBox.innerText = 'فشل الاتصال بالخادم: ' + error.message;
+            } finally {
+                loader.style.display = 'none';
+                processBtn.disabled = false;
+                resultBox.style.opacity = '1';
+            }
+        });
+    </script>
+</body>
+</html>

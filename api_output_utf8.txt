@@ -1,0 +1,7 @@
+﻿Testing sentiment...
+Status: 200
+Error: 'charmap' codec can't encode characters in position 167-169: character maps to <undefined>
+
+Testing stanza...
+Status: 200
+Error: 'charmap' codec can't encode characters in position 104-106: character maps to <undefined>
