@@ -1,0 +1,22 @@
+#!/bin/bash
+# install.sh
+echo "🔧 تثبيت Adawat..."
+
+# الأساسيات
+echo "📦 تثبيت المكتبات الأساسية..."
+pip install -r requirements.txt
+
+# سؤال المستخدم
+echo ""
+echo "هل تريد تثبيت ميزات إضافية؟"
+echo "1) تحليل المشاعر + تحديد اللهجة (~2GB)"
+echo "2) بدون ميزات إضافية"
+read -p "اختر [1/2]: " choice
+
+if [ "$choice" = "1" ]; then
+    echo "📦 تثبيت Transformers..."
+    pip install transformers torch
+fi
+
+echo "✅ تم التثبيت بنجاح!"
+echo "🚀 شغّل: streamlit run app.py"
