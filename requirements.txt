@@ -18,3 +18,17 @@ arramooz-pysqlite
 
 # ─── Data Validation ───
 pydantic>=2.0
+# ─── اختر واحد فقط حسب الحاجة ───
+
+# الخيار 1: Transformers (تحليل مشاعر + لهجات)
+torch
+transformers
+
+# الخيار 2: CAMeL Tools (يحتاج Python <= 3.10)
+camel-tools
+
+# الخيار 3: Stanza (تحليل صرفي)
+stanza
+
+# الخيار 4: Farasa
+farasapy
