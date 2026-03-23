@@ -20,3 +20,5 @@ pydantic>=2.0
 # ─── Optional (if using Farasa/Sentiment) ───
 farasapy
 camel-tools
+torch
+transformers
