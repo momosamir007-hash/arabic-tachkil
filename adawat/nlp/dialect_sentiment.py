@@ -1,24 +1,71 @@
 # adawat/nlp/dialect_sentiment.py
 """تحديد اللهجة العربية وتحليل المشاعر"""
+import logging
+
+logger = logging.getLogger(__name__)
 
 # ============================================
-# محاولة استيراد المكتبات المتاحة
+# اكتشاف المكتبة المتاحة
 # ============================================
 BACKEND = None
 
+# المحاولة 1: CAMeL Tools
 try:
     from camel_tools.dialectid import DialectIdentifier
-    from camel_tools.sentiment import SentimentAnalyzer
-    # اختبار فعلي للنموذج
-    _test_did = DialectIdentifier.pretrained()
+    # اختبار فعلي - هنا تظهر المشكلة
+    _did = DialectIdentifier.pretrained()
     BACKEND = "camel"
-    del _test_did
-except Exception:
+    del _did
+    logger.info("Using CAMeL Tools backend")
+except Exception as e:
+    logger.warning(f"CAMeL Tools غير متاح: {e}")
+
+# المحاولة 2: Transformers
+if BACKEND is None:
     try:
-        from transformers import pipeline
+        from transformers import pipeline as hf_pipeline
         BACKEND = "transformers"
+        logger.info("Using Transformers backend")
     except ImportError:
-        BACKEND = None
+        logger.warning("Transformers غير مثبتة")
+
+# المحاولة 3: لا شيء
+if BACKEND is None:
+    logger.error("لا توجد مكتبة متاحة لتحديد اللهجة وتحليل المشاعر")
+
+# ============================================
+# أسماء اللهجات
+# ============================================
+DIALECT_NAMES = {
+    'AE': 'إماراتية 🇦🇪',
+    'BH': 'بحرينية 🇧🇭',
+    'DZ': 'جزائرية 🇩🇿',
+    'EG': 'مصرية 🇪🇬',
+    'IQ': 'عراقية 🇮🇶',
+    'JO': 'أردنية 🇯🇴',
+    'KW': 'كويتية 🇰🇼',
+    'LB': 'لبنانية 🇱🇧',
+    'LY': 'ليبية 🇱🇾',
+    'MA': 'مغربية 🇲🇦',
+    'MSA': 'فصحى 📖',
+    'OM': 'عمانية 🇴🇲',
+    'PL': 'فلسطينية 🇵🇸',
+    'QA': 'قطرية 🇶🇦',
+    'SA': 'سعودية 🇸🇦',
+    'SD': 'سودانية 🇸🇩',
+    'SY': 'سورية 🇸🇾',
+    'TN': 'تونسية 🇹🇳',
+    'YE': 'يمنية 🇾🇪',
+}
+
+SENTIMENT_AR = {
+    'positive': 'إيجابي 😊',
+    'negative': 'سلبي 😞',
+    'neutral': 'محايد 😐',
+    'LABEL_0': 'سلبي 😞',
+    'LABEL_1': 'محايد 😐',
+    'LABEL_2': 'إيجابي 😊',
+}
 
 # ============================================
 # تحديد اللهجة
@@ -26,66 +73,48 @@ except Exception:
 def detect_dialect(text):
     """تحديد اللهجة العربية"""
     if not text or not text.strip():
-        return {'error': 'لا يوجد نص', 'status': 'error'}
+        return {
+            'error': 'لا يوجد نص',
+            'status': 'error'
+        }
 
     if BACKEND == "camel":
         return _dialect_camel(text)
     elif BACKEND == "transformers":
         return _dialect_transformers(text)
     else:
-        return {
-            'error': 'لا توجد مكتبة متاحة لتحديد اللهجة',
-            'install': 'pip install transformers torch',
-            'status': 'error'
-        }
+        return _no_backend_error("تحديد اللهجة")
 
 
 def _dialect_camel(text):
-    """تحديد اللهجة باستخدام CAMeL Tools"""
     try:
         did = DialectIdentifier.pretrained()
         predictions = did.predict([text])
+        label = str(predictions[0].top)
         return {
             'text': text,
-            'dialect': str(predictions[0].top),
+            'dialect': label,
+            'dialect_name': DIALECT_NAMES.get(label, label),
             'backend': 'camel',
             'status': 'success'
         }
     except Exception as e:
-        return {'error': str(e), 'status': 'error'}
+        # إذا فشل CAMeL، جرّب Transformers
+        logger.warning(f"CAMeL فشل، محاولة Transformers: {e}")
+        try:
+            return _dialect_transformers(text)
+        except Exception:
+            return {'error': str(e), 'status': 'error'}
 
 
 def _dialect_transformers(text):
-    """تحديد اللهجة باستخدام Hugging Face Transformers"""
     try:
-        classifier = pipeline(
+        from transformers import pipeline as hf_pipeline
+        classifier = hf_pipeline(
             "text-classification",
             model="CAMeL-Lab/bert-base-arabic-camelbert-da-did"
         )
-        result = classifier(text[:512])  # حد أقصى 512 حرف
-
-        # ترجمة رمز اللهجة
-        DIALECT_NAMES = {
-            'AE': 'إماراتية 🇦🇪',
-            'BH': 'بحرينية 🇧🇭',
-            'DZ': 'جزائرية 🇩🇿',
-            'EG': 'مصرية 🇪🇬',
-            'IQ': 'عراقية 🇮🇶',
-            'JO': 'أردنية 🇯🇴',
-            'KW': 'كويتية 🇰🇼',
-            'LB': 'لبنانية 🇱🇧',
-            'LY': 'ليبية 🇱🇾',
-            'MA': 'مغربية 🇲🇦',
-            'MSA': 'فصحى 📖',
-            'OM': 'عمانية 🇴🇲',
-            'PL': 'فلسطينية 🇵🇸',
-            'QA': 'قطرية 🇶🇦',
-            'SA': 'سعودية 🇸🇦',
-            'SD': 'سودانية 🇸🇩',
-            'SY': 'سورية 🇸🇾',
-            'TN': 'تونسية 🇹🇳',
-            'YE': 'يمنية 🇾🇪',
-        }
+        result = classifier(text[:512])
         label = result[0]['label']
         score = round(result[0]['score'] * 100, 2)
         return {
@@ -103,16 +132,6 @@ def _dialect_transformers(text):
 # ============================================
 # تحليل المشاعر
 # ============================================
-SENTIMENT_AR = {
-    'positive': 'إيجابي 😊',
-    'negative': 'سلبي 😞',
-    'neutral': 'محايد 😐',
-    'LABEL_0': 'سلبي 😞',
-    'LABEL_1': 'محايد 😐',
-    'LABEL_2': 'إيجابي 😊',
-}
-
-
 def analyze_sentiment(text):
     """تحليل المشاعر في النص العربي"""
     if not text or not text.strip():
@@ -123,41 +142,41 @@ def analyze_sentiment(text):
     elif BACKEND == "transformers":
         return _sentiment_transformers(text)
     else:
-        return [{
-            'error': 'لا توجد مكتبة متاحة لتحليل المشاعر',
-            'install': 'pip install transformers torch',
-            'status': 'error'
-        }]
+        return [_no_backend_error("تحليل المشاعر")]
 
 
 def _sentiment_camel(text):
-    """تحليل المشاعر باستخدام CAMeL Tools"""
     try:
+        from camel_tools.sentiment import SentimentAnalyzer
         sa = SentimentAnalyzer.pretrained()
-        sentences = [s.strip() for s in text.strip().split('\n') if s.strip()]
+        sentences = [s.strip() for s in text.split('\n') if s.strip()]
         predictions = sa.predict(sentences)
         return [
             {
-                'text': sent,
-                'sentiment': pred,
-                'sentiment_ar': SENTIMENT_AR.get(pred, pred),
+                'text': s,
+                'sentiment': p,
+                'sentiment_ar': SENTIMENT_AR.get(p, p),
                 'backend': 'camel',
                 'status': 'success'
             }
-            for sent, pred in zip(sentences, predictions)
+            for s, p in zip(sentences, predictions)
         ]
     except Exception as e:
-        return [{'error': str(e), 'status': 'error'}]
+        logger.warning(f"CAMeL Sentiment فشل: {e}")
+        try:
+            return _sentiment_transformers(text)
+        except Exception:
+            return [{'error': str(e), 'status': 'error'}]
 
 
 def _sentiment_transformers(text):
-    """تحليل المشاعر باستخدام Hugging Face Transformers"""
     try:
-        classifier = pipeline(
+        from transformers import pipeline as hf_pipeline
+        classifier = hf_pipeline(
             "text-classification",
             model="CAMeL-Lab/bert-base-arabic-camelbert-da-sentiment"
         )
-        sentences = [s.strip() for s in text.strip().split('\n') if s.strip()]
+        sentences = [s.strip() for s in text.split('\n') if s.strip()]
         results = []
         for sentence in sentences:
             result = classifier(sentence[:512])
@@ -174,3 +193,18 @@ def _sentiment_transformers(text):
         return results
     except Exception as e:
         return [{'error': str(e), 'status': 'error'}]
+
+
+# ============================================
+# رسالة خطأ موحدة
+# ============================================
+def _no_backend_error(feature):
+    return {
+        'error': f'{feature} غير متاح',
+        'message': 'ثبّت إحدى المكتبات التالية:',
+        'options': [
+            'pip install transformers torch (مُوصى به ✅)',
+            'pip install camel-tools (يحتاج Python ≤ 3.10)',
+        ],
+        'status': 'error'
+            }
